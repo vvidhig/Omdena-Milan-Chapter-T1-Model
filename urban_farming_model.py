@@ -14,7 +14,7 @@ import os
 
 # Set tracking URI and experiment
 mlflow.set_tracking_uri("http://192.168.0.1:5000")
-mlflow.set_experiment("Urban_Farming_Prediction")
+mlflow.set_experiment("Urban_Farming_Prediction_Zone4")
 
 # Load the dataset
 dataset = pd.read_csv("dataset\Zone4_2023_labelled.csv")
