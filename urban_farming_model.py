@@ -20,8 +20,7 @@ mlflow.set_experiment("Urban_Farming_prediction")
 dataset = pd.read_csv("dataset\Zone4_merged.csv")
 numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tolist()
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
-categorical_cols.remove('Loan_Status')
-categorical_cols.remove('Loan_ID')
+categorical_cols.remove('urban_farming')
 
 # Filling categorical columns with mode
 for col in categorical_cols:
