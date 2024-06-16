@@ -76,10 +76,14 @@ param_grid_forest = {
     'max_leaf_nodes': [50, 100]
 }
 
+from sklearn.model_selection import StratifiedKFold
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_SEED)
+
 grid_forest = GridSearchCV(
     estimator=rf,
     param_grid=param_grid_forest,
-    cv=5,
+    cv=cv,
     n_jobs=-1,
     scoring='accuracy',
     verbose=0
