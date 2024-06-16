@@ -61,8 +61,8 @@ for col in categorical_cols:
 dataset['Loan_Status'] = le.fit_transform(dataset['Loan_Status'])
 
 # Train test split
-X = dataset.drop(columns=['Loan_Status', 'Loan_ID'])
-y = dataset.Loan_Status
+X = dataset.drop(columns=['urban_farming'])
+y = dataset['urban_farming']
 RANDOM_SEED = 6
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RANDOM_SEED)
