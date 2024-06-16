@@ -43,11 +43,14 @@ log_columns = ['GHI (kWh/m2)', 'NDBI', 'NDVI', 'BU', 'slope', 'surface_roughness
 
 # Apply log transformation
 for col in log_columns:
-    # Avoid log transformation on non-positive values
     dataset[col] = dataset[col].apply(lambda x: np.log(x) if x > 0 else x)
 
 # Dropping ApplicantIncome and CoapplicantIncome
-dataset = dataset.drop(columns=['ApplicantIncome', 'CoapplicantIncome'])
+drop_columns = ['CH4_column_volume_mixing_ratio_dry_air_x', 'tropospheric_HCHO_column_number_density_x', 
+                'CH4_column_volume_mixing_ratio_dry_air_y', 'tropospheric_HCHO_column_number_density_y', 
+                'cluster']
+dataset.drop(columns=drop_columns, inplace=True)
+
 
 # Label encoding categorical variables
 for col in categorical_cols:
