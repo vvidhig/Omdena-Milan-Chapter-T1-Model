@@ -14,13 +14,13 @@ import os
 
 # Set tracking URI and experiment
 mlflow.set_tracking_uri("http://192.168.0.1:5000")
-mlflow.set_experiment("Urban_Farming_prediction")
+mlflow.set_experiment("Urban_Farming_Prediction")
 
 # Load the dataset
 dataset = pd.read_csv("dataset\Zone4_2023_labelled.csv")
 numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tolist()
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
-categorical_cols.remove('urban_farming')
+# categorical_cols.remove('urban_farming')
 
 # Filling categorical columns with mode
 for col in categorical_cols:
@@ -58,7 +58,7 @@ for col in categorical_cols:
     dataset[col] = le.fit_transform(dataset[col])
 
 # Encode the target columns
-dataset['Loan_Status'] = le.fit_transform(dataset['Loan_Status'])
+# dataset['Loan_Status'] = le.fit_transform(dataset['Loan_Status'])
 
 # Train test split
 X = dataset.drop(columns=['urban_farming'])
