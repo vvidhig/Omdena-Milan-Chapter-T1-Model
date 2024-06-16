@@ -17,7 +17,7 @@ mlflow.set_tracking_uri("http://192.168.0.1:5000")
 mlflow.set_experiment("Urban_Farming_prediction")
 
 # Load the dataset
-dataset = pd.read_csv("dataset\Zone4_merged.csv")
+dataset = pd.read_csv("dataset\Zone4_2023_labelled.csv")
 numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tolist()
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
 categorical_cols.remove('urban_farming')
@@ -35,10 +35,16 @@ for col in numerical_cols:
 # Take care of outliers
 dataset[numerical_cols] = dataset[numerical_cols].apply(lambda x: x.clip(lower=x.quantile(0.05), upper=x.quantile(0.95)))
 
-# Log Transformation & Domain Processing
-dataset['LoanAmount'] = np.log(dataset['LoanAmount']).copy()
-dataset['TotalIncome'] = dataset['ApplicantIncome'] + dataset['CoapplicantIncome']
-dataset['TotalIncome'] = np.log(dataset['TotalIncome']).copy()
+log_columns = ['GHI (kWh/m2)', 'NDBI', 'NDVI', 'BU', 'slope', 'surface_roughness', 'classes',
+               'CO_column_number_density_x', 'NO2_column_number_density_x', 'O3_column_number_density_x', 
+               'SO2_column_number_density_x', 'CO_column_number_density_y', 'NO2_column_number_density_y', 
+               'O3_column_number_density_y', 'SO2_column_number_density_y', 'ST_B10', 'NDWI', 
+               'soil_moisture', 'SAVI']
+
+# Apply log transformation
+for col in log_columns:
+    # Avoid log transformation on non-positive values
+    dataset[col] = dataset[col].apply(lambda x: np.log(x) if x > 0 else x)
 
 # Dropping ApplicantIncome and CoapplicantIncome
 dataset = dataset.drop(columns=['ApplicantIncome', 'CoapplicantIncome'])
