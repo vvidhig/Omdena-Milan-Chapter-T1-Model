@@ -67,6 +67,8 @@ RANDOM_SEED = 6
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RANDOM_SEED, stratify=y)
 
+print(y_train.value_counts())
+
 # RandomForest
 rf = RandomForestClassifier(random_state=RANDOM_SEED)
 param_grid_forest = {
