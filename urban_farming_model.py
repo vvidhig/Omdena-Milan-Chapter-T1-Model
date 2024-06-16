@@ -65,9 +65,11 @@ X = dataset.drop(columns=['urban_farming'])
 y = dataset['urban_farming']
 RANDOM_SEED = 6
 
+print("Y value counts :", y.value_counts())
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RANDOM_SEED, stratify=y)
 
-print(y_train.value_counts())
+print("Y_Train value counts", y_train.value_counts())
 
 # RandomForest
 rf = RandomForestClassifier(random_state=RANDOM_SEED)
