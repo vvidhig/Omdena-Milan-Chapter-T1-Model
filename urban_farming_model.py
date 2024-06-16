@@ -19,6 +19,8 @@ mlflow.set_experiment("Urban_Farming_Prediction_Zone4")
 # Load the dataset
 dataset = pd.read_csv("dataset/Zone4_2023_labelled.csv")
 numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tolist()
+numerical_cols.remove('urban_farming')
+
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
 # categorical_cols.remove('urban_farming')
 
