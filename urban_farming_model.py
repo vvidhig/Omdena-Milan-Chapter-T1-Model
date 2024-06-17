@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn import metrics
+from sklearn.model_selection import StratifiedKFold
 import mlflow
 import mlflow.sklearn
 import os
@@ -81,8 +82,6 @@ param_grid_forest = {
     'criterion': ["gini", "entropy"],
     'max_leaf_nodes': [50, 100]
 }
-
-from sklearn.model_selection import StratifiedKFold
 
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_SEED)
 
