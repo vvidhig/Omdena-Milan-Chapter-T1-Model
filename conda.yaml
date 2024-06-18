@@ -3,7 +3,7 @@ channels:
   - defaults
 
 dependencies:
-  - python=3.10.13
+  - python=3.12.13
   - pip<=23.2.1
   - pip:
     - mlflow==2.7.1
