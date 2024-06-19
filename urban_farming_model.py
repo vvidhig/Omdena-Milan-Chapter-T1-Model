@@ -25,9 +25,6 @@ numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tol
 numerical_cols.remove('Suitable_Areas')
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
 
-# Take care of outliers
-# dataset[numerical_cols] = dataset[numerical_cols].apply(lambda x: x.clip(lower=x.quantile(0.05), upper=x.quantile(0.95)))
-
 log_columns = ["NDVI", "LST", "NDBI", "NDWI", "Roughness", "SAVI", "Slope", "SMI", "solar_radiation"]
 
 # Apply log transformation
