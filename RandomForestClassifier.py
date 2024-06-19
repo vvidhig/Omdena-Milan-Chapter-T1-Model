@@ -86,7 +86,7 @@ def eval_metrics(actual, pred, pred_proba=None):
         plt.legend(loc='lower right')
         # Save plot
         os.makedirs("plots", exist_ok=True)
-        plt.savefig("plots/ROC_curve.png")
+        plt.savefig("plots/ROC_curve_RandomForestClassifier.png")
         # Close plot
         plt.close()
     else:

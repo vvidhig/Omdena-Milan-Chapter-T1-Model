@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Projects/Omdena/T1-Model%20package/mlruns/792363861399963117/fbb42713a4454881abd89c88af893670/artifacts
+end_time: 1718827490967
+entry_point_name: ''
+experiment_id: '792363861399963117'
+lifecycle_stage: active
+run_id: fbb42713a4454881abd89c88af893670
+run_name: sneaky-conch-338
+run_uuid: fbb42713a4454881abd89c88af893670
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1718827487707
+status: 4
+tags: []
+user_id: User

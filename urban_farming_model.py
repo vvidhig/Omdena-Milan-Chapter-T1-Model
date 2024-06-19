@@ -125,7 +125,7 @@ def mlflow_logging(model, X, y, name, use_proba=False):
 
         # Logging artifacts and model
         if use_proba:
-            mlflow.log_artifact("plots/ROC_curve.png")
+            mlflow.log_artifact("plots/ROC_curve_XGBClassifier.png")
         mlflow.sklearn.log_model(model, name)
         
         mlflow.end_run()
