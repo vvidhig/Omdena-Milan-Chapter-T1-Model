@@ -1,0 +1,20 @@
+artifact_path: BiLSTM
+flavors:
+  python_function:
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.tensorflow
+    python_version: 3.12.2
+  tensorflow:
+    code: null
+    data: data
+    keras_version: 2.16.1
+    model_type: keras
+    save_format: tf
+mlflow_version: 2.13.1
+model_size_bytes: 1021497
+model_uuid: 405e3911d6d24eb3952deb936d95bcbe
+run_id: 84c1dcfa92cd4631bf522d9ac118d9ca
+utc_time_created: '2024-06-19 17:19:15.458333'
