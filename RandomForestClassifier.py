@@ -1,22 +1,19 @@
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder, MinMaxScaler
-from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 from sklearn import metrics
-import optuna
-from xgboost import XGBClassifier
-from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 import mlflow
 import mlflow.sklearn
 import os
 from matplotlib import pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 # Set tracking URI and experiment
 # mlflow.set_tracking_uri("http://192.168.0.1:5000")
-mlflow.set_experiment("Urban_Farming_Prediction_Zone4")
+mlflow.set_experiment("Urban_Farming_Prediction_RandomForestClassifier")
 
 # Load the dataset
 dataset = pd.read_csv("dataset/Merged_2014.csv")
@@ -34,9 +31,6 @@ for col in categorical_cols:
 for col in numerical_cols:
     median_value = dataset[col].median()
     dataset[col].fillna(median_value, inplace=True)
-
-# Take care of outliers
-dataset[numerical_cols] = dataset[numerical_cols].apply(lambda x: x.clip(lower=x.quantile(0.05), upper=x.quantile(0.95)))
 
 log_columns = ["NDVI", "LST", "NDBI", "NDWI", "Roughness", "SAVI", "Slope", "SMI", "solar_radiation"]
 
@@ -60,23 +54,18 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_
 
 print("Y_Train value counts:", y_train.value_counts())
 
-# Define XGBClassifier with provided parameters
-xgb_params = {
-    'n_estimators': 1050,
+# Define RandomForestClassifier with provided parameters
+rf_params = {
+    'n_estimators': 1000,
+    'criterion': 'entropy',
     'max_depth': 50,
-    'learning_rate': 0.01,
-    'objective': 'binary:logistic',
-    'eval_metric': 'logloss',
-    'verbosity': 0,
-    'booster': 'gbtree'
+    'n_jobs': 2,
+    'warm_start': True,
+    'random_state': RANDOM_SEED
 }
 
-xgb_model = XGBClassifier(**xgb_params)
-xgb_model.fit(X_train, y_train)
-
-# Train SVM model
-svm_model = SVC(probability=True)
-svm_model.fit(X_train, y_train)
+rf_model = RandomForestClassifier(**rf_params)
+rf_model.fit(X_train, y_train)
 
 # Model evaluation metrics
 def eval_metrics(actual, pred, pred_proba=None):
@@ -116,11 +105,6 @@ def mlflow_logging(model, X, y, name, use_proba=False):
             pred = model.predict(X)
             accuracy, f1, precision, recall, auc = eval_metrics(y, pred)
         # Metrics
-        # Logging best parameters from gridsearch if available
-        if hasattr(model, 'best_params_'):
-            mlflow.log_params(model.best_params_)
-        # Log the metrics
-        mlflow.log_metric("Mean CV score", model.best_score_ if hasattr(model, 'best_score_') else float('nan'))
         mlflow.log_metric("Accuracy", accuracy)
         mlflow.log_metric("f1-score", f1)
         mlflow.log_metric("Precision", precision)
@@ -129,10 +113,9 @@ def mlflow_logging(model, X, y, name, use_proba=False):
 
         # Logging artifacts and model
         if use_proba:
-            mlflow.log_artifact("plots/ROC_curve.png")
+            mlflow.log_artifact("plots/ROC_curve_RandomForestClassifier.png")
         mlflow.sklearn.log_model(model, name)
         
         mlflow.end_run()
 
-mlflow_logging(xgb_model, X_test, y_test, "XGBClassifier", use_proba=True)
-mlflow_logging(svm_model, X_test, y_test, "SVM", use_proba=True)
+mlflow_logging(rf_model, X_test, y_test, "RandomForestClassifier", use_proba=True)
