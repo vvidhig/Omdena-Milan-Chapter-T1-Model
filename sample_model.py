@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore", DeprecationWarning)
 
 # Load the dataset
-file_path = 'dataset/Merged_2014.csv'
+file_path = 'path_to_your_file/Merged_2014.csv'
 data = pd.read_csv(file_path)
 
 # Select categorical columns
@@ -27,6 +27,9 @@ encoded_df = pd.DataFrame(encoded_categorical_cols, columns=encoder.get_feature_
 
 # Drop original categorical columns and concatenate the encoded columns
 data_encoded = data.drop(columns=categorical_cols).join(encoded_df)
+
+# Handle NaN values by filling them with the mean of the respective columns
+data_encoded.fillna(data_encoded.mean(), inplace=True)
 
 # Separate features and labels
 X_encoded = data_encoded.drop(columns=['Suitable_Areas'])
@@ -61,7 +64,7 @@ def objective(trial):
     return score
 
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=5)
+study.optimize(objective, n_trials=50)
 
 print('Number of finished trials:', len(study.trials))
 print('Best trial:', study.best_trial.params)
