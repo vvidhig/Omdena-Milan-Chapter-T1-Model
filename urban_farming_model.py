@@ -20,10 +20,9 @@ mlflow.set_experiment("Urban_Farming_Prediction_Zone4")
 # Load the dataset
 dataset = pd.read_csv("dataset/Merged_2014.csv")
 numerical_cols = dataset.select_dtypes(include=['int64', 'float64']).columns.tolist()
-numerical_cols.remove('urban_farming')
+numerical_cols.remove('Suitable_Areas')
 
 categorical_cols = dataset.select_dtypes(include=['object']).columns.tolist()
-# categorical_cols.remove('urban_farming')
 
 # Filling categorical columns with mode
 for col in categorical_cols:
@@ -38,21 +37,17 @@ for col in numerical_cols:
 # Take care of outliers
 dataset[numerical_cols] = dataset[numerical_cols].apply(lambda x: x.clip(lower=x.quantile(0.05), upper=x.quantile(0.95)))
 
-log_columns = ['GHI (kWh/m2)', 'NDBI', 'NDVI', 'BU', 'slope', 'surface_roughness', 'classes',
-               'CO_column_number_density_x', 'NO2_column_number_density_x', 'O3_column_number_density_x', 
-               'SO2_column_number_density_x', 'CO_column_number_density_y', 'NO2_column_number_density_y', 
-               'O3_column_number_density_y', 'SO2_column_number_density_y', 'ST_B10', 'NDWI', 
-               'soil_moisture', 'SAVI']
+log_columns = ["NDVI", "LST", "NDBI", "NDWI", "Roughness", "SAVI", "Slope", "SMI", "solar_radiation"]
 
 # Apply log transformation
 for col in log_columns:
     dataset[col] = dataset[col].apply(lambda x: np.log(x) if x > 0 else x)
 
-# Dropping Unnecessary Columns
-drop_columns = ['CH4_column_volume_mixing_ratio_dry_air_x', 'tropospheric_HCHO_column_number_density_x', 
-                'CH4_column_volume_mixing_ratio_dry_air_y', 'tropospheric_HCHO_column_number_density_y', 
-                'cluster']
-dataset.drop(columns=drop_columns, inplace=True)
+# # Dropping Unnecessary Columns
+# drop_columns = ['CH4_column_volume_mixing_ratio_dry_air_x', 'tropospheric_HCHO_column_number_density_x', 
+#                 'CH4_column_volume_mixing_ratio_dry_air_y', 'tropospheric_HCHO_column_number_density_y', 
+#                 'cluster']
+# dataset.drop(columns=drop_columns, inplace=True)
 
 
 # Label encoding categorical variables
@@ -60,12 +55,10 @@ for col in categorical_cols:
     le = LabelEncoder()
     dataset[col] = le.fit_transform(dataset[col])
 
-# Encode the target columns
-# dataset['Loan_Status'] = le.fit_transform(dataset['Loan_Status'])
 
 # Train test split
-X = dataset.drop(columns=['urban_farming'])
-y = dataset['urban_farming']
+X = dataset.drop(columns=['Suitable_Areas'])
+y = dataset['Suitable_Areas']
 RANDOM_SEED = 6
 
 print("Y value counts :", y.value_counts())
