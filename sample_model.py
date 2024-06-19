@@ -9,7 +9,7 @@ from sklearn.svm import SVC
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
 import warnings
-warnings.filterwarnings("ignore", DeprecationWarning)
+warnings.filterwarnings("ignore")
 
 # Load the dataset
 file_path = 'dataset/Merged_2014.csv'
