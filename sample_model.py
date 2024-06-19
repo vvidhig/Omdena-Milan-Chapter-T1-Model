@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
-from sklearn.metrics import accuracy_score, recall_score, roc_auc_score
+from sklearn.metrics import accuracy_score, recall_score, roc_auc_score, precision_score
 import optuna
 from xgboost import XGBClassifier
 from sklearn.svm import SVC
@@ -64,7 +64,7 @@ def objective(trial):
     return score
 
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=10)
+study.optimize(objective, n_trials=50)
 
 print('Number of finished trials:', len(study.trials))
 print('Best trial:', study.best_trial.params)
@@ -80,8 +80,9 @@ xgb_pred = (xgb_pred_proba > 0.5).astype(int)
 xgb_accuracy = accuracy_score(y_test, xgb_pred)
 xgb_recall = recall_score(y_test, xgb_pred)
 xgb_auc = roc_auc_score(y_test, xgb_pred_proba)
+xgb_precision = precision_score(y_test, xgb_pred)
 
-print(f'XGBClassifier - Accuracy: {xgb_accuracy}, Recall: {xgb_recall}, AUC: {xgb_auc}')
+print(f'XGBClassifier - Accuracy: {xgb_accuracy}, Recall: {xgb_recall}, AUC: {xgb_auc}, Precision: {xgb_precision}')
 
 # Train SVM and Evaluate
 svm_model = SVC(probability=True)
@@ -93,5 +94,6 @@ svm_pred = svm_model.predict(X_test)
 svm_accuracy = accuracy_score(y_test, svm_pred)
 svm_recall = recall_score(y_test, svm_pred)
 svm_auc = roc_auc_score(y_test, svm_pred_proba)
+svm_precision = precision_score(y_test, svm_pred)
 
-print(f'SVM - Accuracy: {svm_accuracy}, Recall: {svm_recall}, AUC: {svm_auc}')
+print(f'SVM - Accuracy: {svm_accuracy}, Recall: {svm_recall}, AUC: {svm_auc}, Precision: {svm_precision}')
