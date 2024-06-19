@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Projects/Omdena/T1-Model%20package/mlruns/443533188976870263/363e428ab0564133a7ee02e8d1f070c2/artifacts
+end_time: 1718794446248
+entry_point_name: ''
+experiment_id: '443533188976870263'
+lifecycle_stage: active
+run_id: 363e428ab0564133a7ee02e8d1f070c2
+run_name: inquisitive-bird-642
+run_uuid: 363e428ab0564133a7ee02e8d1f070c2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1718794431911
+status: 3
+tags: []
+user_id: User

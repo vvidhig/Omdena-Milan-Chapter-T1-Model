@@ -17,7 +17,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Set tracking URI and experiment
-mlflow.set_tracking_uri("http://192.168.0.1:5000")
+# mlflow.set_tracking_uri("http://192.168.0.1:5000")
 mlflow.set_experiment("Urban_Farming_Prediction")
 
 # Load the dataset
@@ -211,8 +211,8 @@ def mlflow_logging(model, X, y, name, use_proba=False):
         
         mlflow.end_run()
 
-mlflow_logging(model_tree, X_test, y_test, "DecisionTreeClassifier")
-mlflow_logging(model_log, X_test, y_test, "LogisticRegression")
-mlflow_logging(model_forest, X_test, y_test, "RandomForestClassifier")
+# mlflow_logging(model_tree, X_test, y_test, "DecisionTreeClassifier")
+# mlflow_logging(model_log, X_test, y_test, "LogisticRegression")
+# mlflow_logging(model_forest, X_test, y_test, "RandomForestClassifier")
 mlflow_logging(xgb_model, X_test, y_test, "XGBClassifier", use_proba=True)
-mlflow_logging(svm_model, X_test, y_test, "SVM", use_proba=True)
+# mlflow_logging(svm_model, X_test, y_test, "SVM", use_proba=True)
