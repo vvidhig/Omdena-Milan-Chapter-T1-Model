@@ -2,7 +2,7 @@ import mlflow
 mlflow.set_tracking_uri("http://localhost:5000")
 
 
-exp_id = mlflow.create_experiment('Urban_Farming_Prediction_Zone4')
+exp_id = mlflow.create_experiment('Urban_Farming_Prediction')
 
 
 with mlflow.start_run(run_name='DecisionTreeClass') as run: 

@@ -17,8 +17,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 # Set tracking URI and experiment
-# mlflow.set_tracking_uri("http://192.168.0.1:5000")
-mlflow.set_experiment("Urban_Farming_Prediction_Zone4")
+mlflow.set_tracking_uri("http://192.168.0.1:5000")
+mlflow.set_experiment("Urban_Farming_Prediction")
 
 # Load the dataset
 dataset = pd.read_csv("dataset/Merged_2014.csv")
