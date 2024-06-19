@@ -1,17 +1,20 @@
-# Importing the required packages
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from matplotlib import pyplot as plt
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold, cross_val_score
 from sklearn import metrics
-from sklearn.model_selection import StratifiedKFold
+import optuna
+from xgboost import XGBClassifier
+from sklearn.svm import SVC
 import mlflow
 import mlflow.sklearn
 import os
+from matplotlib import pyplot as plt
+import warnings
+warnings.filterwarnings("ignore")
 
 # Set tracking URI and experiment
 # mlflow.set_tracking_uri("http://192.168.0.1:5000")
@@ -43,29 +46,21 @@ log_columns = ["NDVI", "LST", "NDBI", "NDWI", "Roughness", "SAVI", "Slope", "SMI
 for col in log_columns:
     dataset[col] = dataset[col].apply(lambda x: np.log(x) if x > 0 else x)
 
-# # Dropping Unnecessary Columns
-# drop_columns = ['CH4_column_volume_mixing_ratio_dry_air_x', 'tropospheric_HCHO_column_number_density_x', 
-#                 'CH4_column_volume_mixing_ratio_dry_air_y', 'tropospheric_HCHO_column_number_density_y', 
-#                 'cluster']
-# dataset.drop(columns=drop_columns, inplace=True)
-
-
 # Label encoding categorical variables
 for col in categorical_cols:
     le = LabelEncoder()
     dataset[col] = le.fit_transform(dataset[col])
-
 
 # Train test split
 X = dataset.drop(columns=['Suitable_Areas'])
 y = dataset['Suitable_Areas']
 RANDOM_SEED = 6
 
-print("Y value counts :", y.value_counts())
+print("Y value counts:", y.value_counts())
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=RANDOM_SEED, stratify=y)
 
-print("Y_Train value counts", y_train.value_counts())
+print("Y_Train value counts:", y_train.value_counts())
 
 # RandomForest
 rf = RandomForestClassifier(random_state=RANDOM_SEED)
@@ -124,44 +119,94 @@ grid_tree = GridSearchCV(
 )
 model_tree = grid_tree.fit(X_train, y_train)
 
+# Hyperparameter Optimization with Optuna for XGBClassifier
+def objective(trial):
+    param = {
+        'verbosity': 0,
+        'objective': 'binary:logistic',
+        'eval_metric': 'logloss',
+        'booster': 'gbtree',
+        'lambda': trial.suggest_loguniform('lambda', 1e-3, 10.0),
+        'alpha': trial.suggest_loguniform('alpha', 1e-3, 10.0),
+        'subsample': trial.suggest_float('subsample', 0.4, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.4, 1.0),
+        'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
+        'n_estimators': trial.suggest_int('n_estimators', 100, 1000),
+        'max_depth': trial.suggest_int('max_depth', 3, 9),
+        'min_child_weight': trial.suggest_int('min_child_weight', 1, 10)
+    }
+
+    model = XGBClassifier(**param)
+    score = cross_val_score(model, X_train, y_train, cv=3, scoring='roc_auc').mean()
+    return score
+
+study = optuna.create_study(direction='maximize')
+study.optimize(objective, n_trials=50)
+
+print('Number of finished trials:', len(study.trials))
+print('Best trial:', study.best_trial.params)
+
+# Train XGBClassifier with best hyperparameters
+best_params = study.best_trial.params
+xgb_model = XGBClassifier(**best_params)
+xgb_model.fit(X_train, y_train)
+
+# Train SVM model
+svm_model = SVC(probability=True)
+svm_model.fit(X_train, y_train)
+
 # Model evaluation metrics
-def eval_metrics(actual, pred):
+def eval_metrics(actual, pred, pred_proba=None):
     accuracy = metrics.accuracy_score(actual, pred)
     f1 = metrics.f1_score(actual, pred, pos_label=1)
-    fpr, tpr, _ = metrics.roc_curve(actual, pred)
-    auc = metrics.auc(fpr, tpr)
-    plt.figure(figsize=(8, 8))
-    plt.plot(fpr, tpr, color='blue', label='ROC curve area = %0.2f' % auc)
-    plt.plot([0, 1], [0, 1], 'r--')
-    plt.xlim([-0.1, 1.1])
-    plt.ylim([-0.1, 1.1])
-    plt.xlabel('False Positive Rate', size=14)
-    plt.ylabel('True Positive Rate', size=14)
-    plt.legend(loc='lower right')
-    # Save plot
-    os.makedirs("plots", exist_ok=True)
-    plt.savefig("plots/ROC_curve.png")
-    # Close plot
-    plt.close()
-    return accuracy, f1, auc
+    precision = metrics.precision_score(actual, pred, pos_label=1)
+    recall = metrics.recall_score(actual, pred, pos_label=1)
+    if pred_proba is not None:
+        fpr, tpr, _ = metrics.roc_curve(actual, pred_proba)
+        auc = metrics.auc(fpr, tpr)
+        plt.figure(figsize=(8, 8))
+        plt.plot(fpr, tpr, color='blue', label='ROC curve area = %0.2f' % auc)
+        plt.plot([0, 1], [0, 1], 'r--')
+        plt.xlim([-0.1, 1.1])
+        plt.ylim([-0.1, 1.1])
+        plt.xlabel('False Positive Rate', size=14)
+        plt.ylabel('True Positive Rate', size=14)
+        plt.legend(loc='lower right')
+        # Save plot
+        os.makedirs("plots", exist_ok=True)
+        plt.savefig("plots/ROC_curve.png")
+        # Close plot
+        plt.close()
+    else:
+        auc = float('nan')
+    return accuracy, f1, precision, recall, auc
 
-def mlflow_logging(model, X, y, name):
+def mlflow_logging(model, X, y, name, use_proba=False):
     with mlflow.start_run() as run:
         run_id = run.info.run_id
         mlflow.set_tag("run_id", run_id)
-        pred = model.predict(X)
+        if use_proba:
+            pred_proba = model.predict_proba(X)[:, 1]
+            pred = (pred_proba > 0.5).astype(int)
+            accuracy, f1, precision, recall, auc = eval_metrics(y, pred, pred_proba)
+        else:
+            pred = model.predict(X)
+            accuracy, f1, precision, recall, auc = eval_metrics(y, pred)
         # Metrics
-        accuracy, f1, auc = eval_metrics(y, pred)
-        # Logging best parameters from gridsearch
-        mlflow.log_params(model.best_params_)
+        # Logging best parameters from gridsearch if available
+        if hasattr(model, 'best_params_'):
+            mlflow.log_params(model.best_params_)
         # Log the metrics
-        mlflow.log_metric("Mean CV score", model.best_score_)
+        mlflow.log_metric("Mean CV score", model.best_score_ if hasattr(model, 'best_score_') else float('nan'))
         mlflow.log_metric("Accuracy", accuracy)
         mlflow.log_metric("f1-score", f1)
+        mlflow.log_metric("Precision", precision)
+        mlflow.log_metric("Recall", recall)
         mlflow.log_metric("AUC", auc)
 
         # Logging artifacts and model
-        mlflow.log_artifact("plots/ROC_curve.png")
+        if use_proba:
+            mlflow.log_artifact("plots/ROC_curve.png")
         mlflow.sklearn.log_model(model, name)
         
         mlflow.end_run()
@@ -169,3 +214,5 @@ def mlflow_logging(model, X, y, name):
 mlflow_logging(model_tree, X_test, y_test, "DecisionTreeClassifier")
 mlflow_logging(model_log, X_test, y_test, "LogisticRegression")
 mlflow_logging(model_forest, X_test, y_test, "RandomForestClassifier")
+mlflow_logging(xgb_model, X_test, y_test, "XGBClassifier", use_proba=True)
+mlflow_logging(svm_model, X_test, y_test, "SVM", use_proba=True)
