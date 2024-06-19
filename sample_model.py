@@ -12,7 +12,7 @@ import warnings
 warnings.filterwarnings("ignore", DeprecationWarning)
 
 # Load the dataset
-file_path = 'path_to_your_file/Merged_2014.csv'
+file_path = 'dataset/Merged_2014.csv'
 data = pd.read_csv(file_path)
 
 # Select categorical columns
@@ -64,7 +64,7 @@ def objective(trial):
     return score
 
 study = optuna.create_study(direction='maximize')
-study.optimize(objective, n_trials=50)
+study.optimize(objective, n_trials=10)
 
 print('Number of finished trials:', len(study.trials))
 print('Best trial:', study.best_trial.params)
